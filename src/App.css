@@ -1,0 +1,73 @@
+.main {
+  display: flex;
+  justify-content: space-around;
+  align-items: center;
+  flex-direction: column;
+  background-color: #242424;
+}
+
+.head {
+  display: flex;
+  justify-content: center;
+  flex-direction: column;
+  margin-top: 2rem;
+  margin-bottom: 2rem;
+}
+
+.head h1 {
+  margin: 0;
+}
+
+.head p {
+  font-size: 20px;
+  text-align: center;
+}
+
+.main-container {
+  width: 100%;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4rem;
+  justify-content: space-evenly;
+  align-items: center;
+}
+
+.picture {
+  display: flex;
+  justify-content: center;
+}
+
+.card-item {
+  padding: 2rem;
+  display: flex;
+  flex-direction: column;
+  border-radius: 1.5rem;
+  background-color: rgb(56, 56, 56);
+  transition: all 0.2s ease-in-out;
+}
+
+.card-item p {
+  font-style: italic;
+  text-align: center;
+  margin: 0;
+}
+
+.card-item:hover {
+  cursor: pointer;
+  transform: scale(1.05);
+  box-shadow: 0px 10px 34px 28px rgba(0,0,0,0.4);
+}
+
+.ig-input {
+  width: 70vw;
+}
+
+.video-container {
+  width: 400px;
+}
+
+@media (max-width: 756px) {
+  .video-container {
+    width: 70vw;
+  }
+}
