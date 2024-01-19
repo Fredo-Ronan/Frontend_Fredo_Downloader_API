@@ -110,6 +110,37 @@ function App() {
                       <>
                         <div className="d-flex justify-content-center mt-4">
                           <div className="d-flex justify-content-center flex-wrap gap-4">
+                            {instagramAudio === null ? (
+                              <>
+                                <a
+                                  href={instagramVideo}
+                                  target="_blank"
+                                  style={{
+                                    color: "white",
+                                    textDecoration: "none",
+                                  }}
+                                >
+                                  <button className="btn btn-success">
+                                    Download Video
+                                  </button>
+                                </a>
+                              </>
+                            ) : (
+                              <>
+                                <div>
+                                  <h2>Video</h2>
+                                  <video className="video-container" controls>
+                                    <source src={instagramVideo} />
+                                  </video>
+                                </div>
+                                <div>
+                                  <h2>Audio</h2>
+                                  <audio controls>
+                                    <source src={instagramAudio} />
+                                  </audio>
+                                </div>
+                              </>
+                            )}
                             {/* <a href={instagramVideo} download={new Date().toLocaleString() + ".mp4"} rel="noreferrer" target="_blank" style={{color: "white", textDecoration: "none"}}>
                                 <button className="btn btn-success">
                                   Download Video
@@ -120,18 +151,6 @@ function App() {
                                   Download Audio
                                 </button>
                               </a> */}
-                            <div>
-                              <h2>Video</h2>
-                              <video className="video-container" controls>
-                                <source src={instagramVideo} />
-                              </video>
-                            </div>
-                            <div>
-                              <h2>Audio</h2>
-                              <audio controls>
-                                <source src={instagramAudio} />
-                              </audio>
-                            </div>
                           </div>
                         </div>
                       </>
