@@ -23,6 +23,10 @@ export const DownloadYoutube = async (url) => {
 }
 
 export const CheckLink = async (url) => {
-    const response = await fetch(url, {method: "HEAD"});
-    return response.ok;
+    try {
+        const response = await fetch(url, {method: "HEAD"});
+        return response.ok;
+    } catch(e) {
+        return false;
+    }
 }
