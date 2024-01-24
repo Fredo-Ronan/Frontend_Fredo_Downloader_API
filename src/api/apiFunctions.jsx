@@ -25,7 +25,12 @@ export const DownloadYoutube = async (url) => {
 export const CheckLink = async (url) => {
     try {
         const response = await fetch(url, {method: "HEAD"});
-        return response.ok;
+        
+        if(response.status === 403){
+            return false;
+        } else {
+            return true;
+        }
     } catch(e) {
         return false;
     }
