@@ -2,14 +2,18 @@ import { useState } from "react";
 import Image from "react-bootstrap/Image";
 import Spinner from "react-bootstrap/Spinner";
 import muxjs from "mux.js";
-import { mp2t } from 'mux.js';
+import { mp2t } from "mux.js";
 const { TransportDemuxStream } = mp2t;
 
 import instagram from "./assets/instagram.png";
 import youtube from "./assets/youtube.png";
 
 import "./App.css";
-import { DownloadInstagram, DownloadYoutube } from "./api/apiFunctions";
+import {
+  CheckLink,
+  DownloadInstagram,
+  DownloadYoutube,
+} from "./api/apiFunctions";
 
 function App() {
   const [isChoosen, setIsChoosen] = useState(false);
@@ -44,7 +48,7 @@ function App() {
     setValidYTLink(false);
     setYoutubeVideo("");
     setIsChoosen(false);
-  }
+  };
 
   // Instagram Side Functions
   const fetchInstagram = (url) => {
@@ -77,7 +81,6 @@ function App() {
     setChoose("ig");
   };
 
-
   // Youtube Side Functions
   const mergeVideoAudio = async (videoUrl, audioUrl) => {
     try {
@@ -89,40 +92,46 @@ function App() {
       const videoData = new Uint8Array(binaryVideo.length);
       const audioData = new Uint8Array(binaryAudio.length);
 
-      for(let i = 0; i<binaryVideo.length; i++){
+      for (let i = 0; i < binaryVideo.length; i++) {
         videoData[i] = binaryVideo.charCodeAt(i);
       }
 
-      for(let i = 0; i<binaryAudio.length; i++){
+      for (let i = 0; i < binaryAudio.length; i++) {
         audioData[i] = binaryAudio.charCodeAt(i);
       }
 
       // Create Mux.js transport streams for video and audio
-      const videoStream = new muxjs.mp2t.TransportPacketStream({ type: 'video' });
-      const audioStream = new muxjs.mp2t.TransportPacketStream({ type: 'audio' });
+      const videoStream = new muxjs.mp2t.TransportPacketStream({
+        type: "video",
+      });
+      const audioStream = new muxjs.mp2t.TransportPacketStream({
+        type: "audio",
+      });
 
       // Push video and audio data to streams
       videoStream.push({ data: videoData });
       audioStream.push({ data: audioData });
 
       // Create a Mux.js demuxer to merge video and audio
-      const demuxer = new TransportDemuxStream({ keepOriginalTimestamps: true });
+      const demuxer = new TransportDemuxStream({
+        keepOriginalTimestamps: true,
+      });
       videoStream.pipe(demuxer);
       audioStream.pipe(demuxer);
 
       // Listen for 'data' events to get the merged data
-      demuxer.on('data', (chunk) => {
+      demuxer.on("data", (chunk) => {
         // Handle merged data (chunk)
         // For example, you can create a Blob and trigger a download
-        const blob = new Blob([chunk], { type: 'video/mp4' });
+        const blob = new Blob([chunk], { type: "video/mp4" });
         const videoLink = URL.createObjectURL(blob);
 
-        console.log('Merging finished');
+        console.log("Merging finished");
 
         return videoLink;
       });
     } catch (error) {
-      console.error('Error during merging:', error);
+      console.error("Error during merging:", error);
     }
   };
   // const mergeVideoAudio = async (videoUrl, audioUrl) => {
@@ -160,38 +169,39 @@ function App() {
   //   }
   // };
 
-
   const fetchYoutube = (url) => {
     setIsLoading(true);
-    DownloadYoutube(url).then( async (res) => {
-      console.log(res.video);
-      console.log(res.audio);
-      // const videoLink = await mergeVideoAudio(res.video, res.audio);
+    DownloadYoutube(url)
+      .then(async (res) => {
+        console.log(res.video);
+        console.log(res.audio);
+        // const videoLink = await mergeVideoAudio(res.video, res.audio);
 
-      // console.log(videoLink);
-      setYoutubeVideo(res.video);
-      setYoutubeAudio(res.audio);
-      setIsLoading(false);
-      setValidYTLink(true);
-    }).catch((err) => {
-      console.log(err);
-      setValidYTLink(false);
-      setChoose("");
-    })
-  }
+        // console.log(videoLink);
+        setYoutubeVideo(res.video);
+        setYoutubeAudio(res.audio);
+        setIsLoading(false);
+        setValidYTLink(true);
+      })
+      .catch((err) => {
+        console.log(err);
+        setValidYTLink(false);
+        setChoose("");
+      });
+  };
 
   const inputYTLinkHandler = (value) => {
     setYtLink(value);
 
-    if(value.includes("https://www.youtube.com/")) {
+    if (value.includes("https://www.youtube.com/")) {
       fetchYoutube(value);
     }
-  }
+  };
 
   const youtubeClick = () => {
     setIsChoosen(!isChoosen);
     setChoose("yt");
-  }
+  };
 
   return (
     <div className="main">
@@ -206,7 +216,10 @@ function App() {
             ) : (
               <>
                 <h2>Youtube Downloader (BETA)</h2>
-                <p style={{fontStyle: "italic"}}>Note that this youtube downloader is still in BETA version, so it's not very stable yet</p>
+                <p style={{ fontStyle: "italic" }}>
+                  Note that this youtube downloader is still in BETA version, so
+                  it's not very stable yet
+                </p>
                 <p>Paste the Youtube link</p>
               </>
             )}
@@ -225,7 +238,10 @@ function App() {
             {choose === "ig" ? (
               <div className="d-flex justify-content-center align-items-center flex-column">
                 <div>
-                  <button className="btn btn-danger mb-4" onClick={backToHomeIG}>
+                  <button
+                    className="btn btn-danger mb-4"
+                    onClick={backToHomeIG}
+                  >
                     Go Back to Home
                   </button>
                 </div>
@@ -314,55 +330,90 @@ function App() {
               <>
                 {/* Youtube Downloader */}
                 <div className="d-flex justify-content-center align-items-center flex-column">
-                <div>
-                  <button className="btn btn-danger mb-4" onClick={backToHomeYT}>
-                    Go Back to Home
-                  </button>
-                </div>
-                <div className="ig-input">
-                  <input
-                    type="text"
-                    className="form-control"
-                    value={ytLink}
-                    onChange={(e) => inputYTLinkHandler(e.target.value)}
-                    placeholder="paste youtube link here..."
-                  />
-                </div>
-                {isLoading ? (
-                  <>
-                    <div className="d-flex justify-content-center mt-4">
-                      <Spinner animation="border" size="lg" />
-                    </div>
-                  </>
-                ) : (
-                  <>
-                    {validYTLink ? (
-                      <>
-                        <div className="d-flex justify-content-center mt-4">
-                          <div className="d-flex justify-content-center flex-wrap gap-4">
-                            {youtubeVideo === null ? (
-                              <>
-                                <div className="alert alert-danger" role="alert">
-                                  Failed to get youtube video
-                                </div>
-                              </>
-                            ) : (
-                              <>
-                                <div>
-                                  <h2>Video</h2>
-                                  <video className="video-container" controls>
-                                    <source src={youtubeVideo} />
-                                  </video>
-                                </div>
-                                <div>
-                                  <h2>Audio</h2>
-                                  <audio controls>
-                                    <source src={youtubeAudio} />
-                                  </audio>
-                                </div>
-                              </>
-                            )}
-                            {/* <a href={instagramVideo} download={new Date().toLocaleString() + ".mp4"} rel="noreferrer" target="_blank" style={{color: "white", textDecoration: "none"}}>
+                  <div>
+                    <button
+                      className="btn btn-danger mb-4"
+                      onClick={backToHomeYT}
+                    >
+                      Go Back to Home
+                    </button>
+                  </div>
+                  <div className="ig-input">
+                    <input
+                      type="text"
+                      className="form-control"
+                      value={ytLink}
+                      onChange={(e) => inputYTLinkHandler(e.target.value)}
+                      placeholder="paste youtube link here..."
+                    />
+                  </div>
+                  {isLoading ? (
+                    <>
+                      <div className="d-flex justify-content-center mt-4">
+                        <Spinner animation="border" size="lg" />
+                      </div>
+                    </>
+                  ) : (
+                    <>
+                      {validYTLink ? (
+                        <>
+                          <div className="d-flex justify-content-center mt-4">
+                            <div className="d-flex justify-content-center flex-wrap gap-4">
+                              {youtubeVideo === null ? (
+                                <>
+                                  <div
+                                    className="alert alert-danger"
+                                    role="alert"
+                                  >
+                                    Failed to get youtube video
+                                  </div>
+                                </>
+                              ) : (
+                                <>
+                                  <div>
+                                    <h2>Video</h2>
+                                    {CheckLink(youtubeVideo) ? (
+                                      <video
+                                        className="video-container"
+                                        controls
+                                      >
+                                        <source src={youtubeVideo} />
+                                      </video>
+                                    ) : (
+                                      <>
+                                        <p>
+                                          Video Link is not accessible, this
+                                          usually because the youtube link is
+                                          contains some content that from google
+                                          and youtube restrict access to the
+                                          content due to the copyright or
+                                          something else.
+                                        </p>
+                                      </>
+                                    )}
+                                  </div>
+                                  <div>
+                                    <h2>Audio</h2>
+                                    {CheckLink(youtubeAudio) ? (
+                                      <audio controls>
+                                        <source src={youtubeAudio} />
+                                      </audio>
+                                    ) : (
+                                      <>
+                                        <p>
+                                          Audio Link is not accessible, this
+                                          usually because the youtube link is
+                                          contains some content that from google
+                                          and youtube restrict access to the
+                                          content due to the copyright or
+                                          something else.
+                                        </p>
+                                      </>
+                                    )}
+                                  </div>
+                                </>
+                              )}
+                              {/* <a href={instagramVideo} download={new Date().toLocaleString() + ".mp4"} rel="noreferrer" target="_blank" style={{color: "white", textDecoration: "none"}}>
                                 <button className="btn btn-success">
                                   Download Video
                                 </button>
@@ -372,25 +423,25 @@ function App() {
                                   Download Audio
                                 </button>
                               </a> */}
+                            </div>
                           </div>
-                        </div>
-                      </>
-                    ) : (
-                      <>
-                        {!validYTLink && ytLink !== "" ? (
-                          <div className="text-center mt-4">
-                            <h2 className="text-warning">
-                              The link is not Valid
-                            </h2>
-                          </div>
-                        ) : (
-                          <></>
-                        )}
-                      </>
-                    )}
-                  </>
-                )}
-              </div>
+                        </>
+                      ) : (
+                        <>
+                          {!validYTLink && ytLink !== "" ? (
+                            <div className="text-center mt-4">
+                              <h2 className="text-warning">
+                                The link is not Valid
+                              </h2>
+                            </div>
+                          ) : (
+                            <></>
+                          )}
+                        </>
+                      )}
+                    </>
+                  )}
+                </div>
               </>
             )}
           </>
