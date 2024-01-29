@@ -4,6 +4,8 @@ import Spinner from "react-bootstrap/Spinner";
 import muxjs from "mux.js";
 import { mp2t } from "mux.js";
 const { TransportDemuxStream } = mp2t;
+import Alert from "react-bootstrap/Alert";
+import Button from "react-bootstrap/Button";
 
 import instagram from "./assets/instagram.png";
 import youtube from "./assets/youtube.png";
@@ -14,15 +16,19 @@ import {
   DownloadInstagram,
   DownloadYoutube,
 } from "./api/apiFunctions";
+import fetchData from "./components/VideoAudioShow";
+import VideoAudioShow from "./components/VideoAudioShow";
 
 function App() {
   const [isChoosen, setIsChoosen] = useState(false);
   const [choose, setChoose] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+  const [showFetchError, setShowFetchError] = useState(false);
 
   // Instagram Side Constants
   const [igLink, setIgLink] = useState("");
   const [validIGLink, setValidIGLink] = useState(false);
+  const [isFetchSuccess, setIsFetchSuccess] = useState(false);
   const [instagramVideo, setInstagramVideo] = useState("");
   const [instagramAudio, setInstagramAudio] = useState("");
 
@@ -55,16 +61,26 @@ function App() {
     setIsLoading(true);
     DownloadInstagram(url)
       .then((result) => {
-        console.log(result.video);
-        setInstagramVideo(result.video);
-        setInstagramAudio(result.audio);
-        setIsLoading(false);
-        setValidIGLink(true);
+        if (result.status === "OK") {
+          console.log(result.video);
+          setInstagramVideo(result.video);
+          setInstagramAudio(result.audio);
+          setIsLoading(false);
+          setValidIGLink(true);
+          setIsFetchSuccess(true);
+        } else {
+          setValidIGLink(true);
+          setShowFetchError(true);
+          setIsLoading(false);
+          setIsFetchSuccess(false);
+        }
       })
       .catch((err) => {
         console.log(err);
-        setValidIGLink(false);
-        setChoose("");
+        setValidIGLink(true);
+        setShowFetchError(true);
+        setIsLoading(false);
+        setIsFetchSuccess(false);
       });
   };
 
@@ -266,47 +282,53 @@ function App() {
                       <>
                         <div className="d-flex justify-content-center mt-4">
                           <div className="d-flex justify-content-center flex-wrap gap-4">
-                            {instagramAudio === null ? (
-                              <>
-                                <a
-                                  href={instagramVideo}
-                                  target="_blank"
-                                  style={{
-                                    color: "white",
-                                    textDecoration: "none",
-                                  }}
-                                >
-                                  <button className="btn btn-success">
-                                    Download Video
-                                  </button>
-                                </a>
-                              </>
+                            {isFetchSuccess ? (
+                              instagramAudio === null ? (
+                                <>
+                                  <a
+                                    href={instagramVideo}
+                                    target="_blank"
+                                    style={{
+                                      color: "white",
+                                      textDecoration: "none",
+                                    }}
+                                  >
+                                    <button className="btn btn-success">
+                                      Download Video
+                                    </button>
+                                  </a>
+                                </>
+                              ) : (
+                                <>
+                                  <VideoAudioShow
+                                    videoLink={instagramVideo}
+                                    audioLink={instagramAudio}
+                                  />
+                                </>
+                              )
                             ) : (
                               <>
-                                <div>
-                                  <h2>Video</h2>
-                                  <video className="video-container" controls>
-                                    <source src={instagramVideo} />
-                                  </video>
-                                </div>
-                                <div>
-                                  <h2>Audio</h2>
-                                  <audio controls>
-                                    <source src={instagramAudio} />
-                                  </audio>
+                                {/* Render something when isFetchSuccess is false */}
+                                <div className="m-5">
+                                  <Alert
+                                    variant="danger"
+                                    onClose={() => backToHomeIG()}
+                                    dismissible
+                                  >
+                                    <Alert.Heading>
+                                      Error dalam mengambil informasi video
+                                    </Alert.Heading>
+                                    <p>
+                                      Penyebab error ini terjadi biasanya
+                                      berasal dari masalah yang tidak terduga
+                                      dari server website ini atau server dari
+                                      pihak ketiga yang digunakan website ini.
+                                      Mohon coba lagi nanti...
+                                    </p>
+                                  </Alert>
                                 </div>
                               </>
                             )}
-                            {/* <a href={instagramVideo} download={new Date().toLocaleString() + ".mp4"} rel="noreferrer" target="_blank" style={{color: "white", textDecoration: "none"}}>
-                                <button className="btn btn-success">
-                                  Download Video
-                                </button>
-                              </a>
-                              <a href={instagramAudio} download={new Date().toLocaleString() + ".mp3"} rel="noreferrer" target="_blank" style={{color: "white", textDecoration: "none"}}>
-                                <button className="btn btn-primary">
-                                  Download Audio
-                                </button>
-                              </a> */}
                           </div>
                         </div>
                       </>
@@ -361,56 +383,29 @@ function App() {
                             <div className="d-flex justify-content-center flex-wrap gap-4">
                               {youtubeVideo === null ? (
                                 <>
-                                  <div
-                                    className="alert alert-danger"
-                                    role="alert"
+                                  <Alert
+                                    variant="danger"
+                                    onClose={() => backToHomeYT()}
+                                    dismissible
                                   >
-                                    Failed to get youtube video
-                                  </div>
+                                    <Alert.Heading>
+                                      Error dalam mengambil informasi video
+                                    </Alert.Heading>
+                                    <p>
+                                      Penyebab error ini terjadi biasanya
+                                      berasal dari masalah yang tidak terduga
+                                      dari server website ini atau server dari
+                                      pihak ketiga yang digunakan website ini.
+                                      Mohon coba lagi nanti...
+                                    </p>
+                                  </Alert>
                                 </>
                               ) : (
                                 <>
-                                  <div>
-                                    <h2>Video</h2>
-                                    {CheckLink(youtubeVideo) ? (
-                                      <video
-                                        className="video-container"
-                                        controls
-                                      >
-                                        <source src={youtubeVideo} />
-                                      </video>
-                                    ) : (
-                                      <>
-                                        <p>
-                                          Video Link is not accessible, this
-                                          usually because the youtube link is
-                                          contains some content that from google
-                                          and youtube restrict access to the
-                                          content due to the copyright or
-                                          something else.
-                                        </p>
-                                      </>
-                                    )}
-                                  </div>
-                                  <div>
-                                    <h2>Audio</h2>
-                                    {CheckLink(youtubeAudio) ? (
-                                      <audio controls>
-                                        <source src={youtubeAudio} />
-                                      </audio>
-                                    ) : (
-                                      <>
-                                        <p>
-                                          Audio Link is not accessible, this
-                                          usually because the youtube link is
-                                          contains some content that from google
-                                          and youtube restrict access to the
-                                          content due to the copyright or
-                                          something else.
-                                        </p>
-                                      </>
-                                    )}
-                                  </div>
+                                  <VideoAudioShow
+                                    audioLink={youtubeAudio}
+                                    videoLink={youtubeVideo}
+                                  />
                                 </>
                               )}
                               {/* <a href={instagramVideo} download={new Date().toLocaleString() + ".mp4"} rel="noreferrer" target="_blank" style={{color: "white", textDecoration: "none"}}>
